@@ -66,13 +66,45 @@ body {
   border-radius: 1px;
   background-color: rgba(0, 0, 0, 0.03);
 }
-.option{
+.option {
   width: 100%;
   padding: 10px;
 }
-.grid-cell{
+.grid-cell {
   padding: 0% !important;
 }
-.h5{
+.h5 {
   padding: 15px;
+}
+
+.button-answer {
+  display: flex;
+  margin: 40px auto;
+  font-size: 20px;
+  align-items: center;
+}
+
+.grid-button {
+  border-radius: 5px;
+  background-color: #fffefe;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.options {
+  margin: 10px;
+  border-radius: 10px;
+  border: 1px solid #dedddd;
+  font-style: oblique;
+  cursor: pointer;
+}
+
+.option-user-selected {
+  background-color: lightblue !important;
+}
+.option-correct-answer {
+  background-color: lightgreen;
+}
+.option-wrong-answer {
+  background-color: red;
 }

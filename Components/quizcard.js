@@ -16,7 +16,9 @@ const QuizCard = ({ isAnswer }) => {
     router.query &&
     router.query.scoreData &&
     JSON.parse(router.query.scoreData);
+
   if (isAnswer && !marks && apiDate) {
+    console.log("99999999999999", apiDate);
     router.push(`/quiz/question?date${apiDate}`);
   }
 
@@ -85,6 +87,10 @@ const QuizCard = ({ isAnswer }) => {
       {isAnswer && <Scorecard marks={marks} />}
       {questions &&
         questions.map((question, qnIndex) => {
+          const correctOption =
+            marks &&
+            marks.validatedAnswer[question.$id] &&
+            marks.validatedAnswer[question.$id].correctOption;
           return (
             <Grid className="grid" key={"qn" + qnIndex}>
               <Col className="box">
@@ -97,19 +103,37 @@ const QuizCard = ({ isAnswer }) => {
                   </Row>
                   <Col className="option">
                     {question.options.map((option, opIndex) => {
+                      const correctOption =
+                        marks &&
+                        marks.validatedAnswer[question.$id] &&
+                        marks.validatedAnswer[question.$id].correctOption;
                       return (
                         <RadioGroup
                           name="option-radio"
                           value={optionsClicked[question.$id]}
                           key={"op" + opIndex}
-                          onChange={(val) => {
-                            setOptionsClicked({
-                              ...optionsClicked,
-                              [question.$id]: val,
-                            });
-                          }}
                         >
-                          <Row className="options">
+                          <Row
+                            className={`options ${
+                              !isAnswer
+                                ? opIndex === optionsClicked[question.$id]
+                                  ? "option-user-selected"
+                                  : ""
+                                : !(opIndex === optionsClicked[question.$id])
+                                ? opIndex === correctOption
+                                  ? "option-correct-answer"
+                                  : ""
+                                : optionsClicked[question.$id] === correctOption
+                                ? "option-correct-answer"
+                                : "option-wrong-answer"
+                            } `}
+                            onClick={() => {
+                              setOptionsClicked({
+                                ...optionsClicked,
+                                [question.$id]: opIndex,
+                              });
+                            }}
+                          >
                             <Radio value={opIndex} readOnly={isAnswer}>
                               {option}
                             </Radio>
@@ -121,13 +145,7 @@ const QuizCard = ({ isAnswer }) => {
                   <Col>
                     {isAnswer && marks && (
                       <Row className="answer-des">
-                        <h6>
-                          Answer Option{" "}
-                          {marks &&
-                            marks.validatedAnswer[question.$id] &&
-                            marks.validatedAnswer[question.$id].correctOption +
-                              1}{" "}
-                        </h6>
+                        <h6>Correct Answer: Option {correctOption + 1} </h6>
                         <p>{question.description}</p>
                       </Row>
                     )}
@@ -137,25 +155,27 @@ const QuizCard = ({ isAnswer }) => {
             </Grid>
           );
         })}
-      <Button
-        className="button-answer"
-        onClick={() => {
-          const scoreData = answerValidation();
-          console.log("goddddddd", scoreData);
-          router.push(
-            {
-              pathname: "/quiz/answer",
-              query: {
-                scoreData: JSON.stringify(scoreData),
-                date : apiDate,
+      <Grid className="grid-button">
+        <Button
+          className="button-answer"
+          onClick={() => {
+            const scoreData = answerValidation();
+            console.log("goddddddd", scoreData);
+            router.push(
+              {
+                pathname: "/quiz/answer",
+                query: {
+                  scoreData: JSON.stringify(scoreData),
+                  date: apiDate,
+                },
               },
-            },
-            "/quiz/answer"
-          );
-        }}
-      >
-        Submit Answer
-      </Button>
+              "/quiz/answer"
+            );
+          }}
+        >
+          Submit Your Answer's
+        </Button>
+      </Grid>
     </div>
   );
 };
