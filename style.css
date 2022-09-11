@@ -108,3 +108,12 @@ body {
 .option-wrong-answer {
   background-color: red;
 }
+.button{
+  display: flex;
+}
+
+h3{
+  font-size: 28px;
+  margin: 30px 0;
+  line-height: 42px;
+}

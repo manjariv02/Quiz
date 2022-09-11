@@ -10,24 +10,36 @@ const QuizCard = ({ isAnswer }) => {
   const [optionsClicked, setOptionsClicked] = useState({});
   const router = useRouter();
   console.log("routerrrrrrrrrrr", router);
-  const apiDate = router.query.date;
+  const apiId = router.query.date;
   const marks =
     router &&
     router.query &&
     router.query.scoreData &&
     JSON.parse(router.query.scoreData);
 
-  if (isAnswer && !marks && apiDate) {
-    console.log("99999999999999", apiDate);
-    router.push(`/quiz/question?date${apiDate}`);
+  if (isAnswer && !marks && apiId) {
+    console.log("99999999999999", apiId);
+    router.push(`/quiz/question?date${apiId}`);
   }
 
   const getQuestions = async () => {
-    const data = await database.listDocuments("6305d25b57aada2625d7", [
-      Query.equal("date", apiDate),
+    const data = await database.listDocuments("6319a1b1021a0c2aa7ce", [
+      Query.equal("slug", apiId),
     ]);
-    console.log("dataaaa", data.documents);
-    setQuestions(data.documents);
+    console.log("iddddddd", data);
+
+    const quiz_id = data.documents[0] && data.documents[0].id;
+    console.log("iddddddd", quiz_id);
+
+    if (quiz_id) {
+      const data_Question = await database.listDocuments(
+        "631d5e36e6e443458253",
+        [Query.equal("quiz_id", quiz_id)]
+      );
+      const question_doc= data_Question.documents;
+      console.log("mmmm",question_doc)
+      setQuestions(question_doc)
+    }
   };
 
   const answerValidation = () => {
@@ -68,7 +80,7 @@ const QuizCard = ({ isAnswer }) => {
 
   useEffect(() => {
     getQuestions();
-  }, [apiDate]);
+  }, [apiId]);
 
   useEffect(() => {
     if (questions) {
@@ -99,10 +111,10 @@ const QuizCard = ({ isAnswer }) => {
                 </Row>
                 <Col className="grid-cell">
                   <Row className="body-question">
-                    <h6>{question.questions}</h6>
+                    <h6>{question.question}?</h6>
                   </Row>
                   <Col className="option">
-                    {question.options.map((option, opIndex) => {
+                    {question.option.map((optionQ, opIndex) => {
                       const correctOption =
                         marks &&
                         marks.validatedAnswer[question.$id] &&
@@ -114,6 +126,7 @@ const QuizCard = ({ isAnswer }) => {
                           key={"op" + opIndex}
                         >
                           <Row
+                          
                             className={`options ${
                               !isAnswer
                                 ? opIndex === optionsClicked[question.$id]
@@ -128,24 +141,26 @@ const QuizCard = ({ isAnswer }) => {
                                 : "option-wrong-answer"
                             } `}
                             onClick={() => {
-                              setOptionsClicked({
-                                ...optionsClicked,
-                                [question.$id]: opIndex,
-                              });
+                              if (!isAnswer) {
+                                setOptionsClicked({
+                                  ...optionsClicked,
+                                  [question.$id]: opIndex,
+                                });
+                              }
                             }}
                           >
                             <Radio value={opIndex} readOnly={isAnswer}>
-                              {option}
+                              {optionQ}
                             </Radio>
                           </Row>
                         </RadioGroup>
                       );
                     })}
                   </Col>
-                  <Col>
+                  <Col style={{width:"100%"}}>
                     {isAnswer && marks && (
                       <Row className="answer-des">
-                        <h6>Correct Answer: Option {correctOption + 1} </h6>
+                        <h6>Correct Answer: Option {correctOption} </h6>
                         <p>{question.description}</p>
                       </Row>
                     )}
@@ -155,27 +170,29 @@ const QuizCard = ({ isAnswer }) => {
             </Grid>
           );
         })}
-      <Grid className="grid-button">
-        <Button
-          className="button-answer"
-          onClick={() => {
-            const scoreData = answerValidation();
-            console.log("goddddddd", scoreData);
-            router.push(
-              {
-                pathname: "/quiz/answer",
-                query: {
-                  scoreData: JSON.stringify(scoreData),
-                  date: apiDate,
+      {!isAnswer && (
+        <Grid className="grid-button">
+          <Button
+            className="button-answer"
+            onClick={() => {
+              const scoreData = answerValidation();
+              console.log("goddddddd", scoreData);
+              router.push(
+                {
+                  pathname: "/quiz/answer",
+                  query: {
+                    scoreData: JSON.stringify(scoreData),
+                    date: apiId,
+                  },
                 },
-              },
-              "/quiz/answer"
-            );
-          }}
-        >
-          Submit Your Answer's
-        </Button>
-      </Grid>
+                "/quiz/answer"
+              );
+            }}
+          >
+            Submit Your Answer's
+          </Button>
+        </Grid>
+      )}
     </div>
   );
 };
